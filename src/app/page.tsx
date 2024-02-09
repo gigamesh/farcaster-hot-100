@@ -5,10 +5,9 @@ import { ThemeToggle } from "../components/ThemeToggle";
 import { Container } from "@components/Container";
 import { clampValue, cn } from "@lib/utils";
 
-console.log("here1");
+const REVALIDATION_INTERVAL = 60 * 60 * 2;
 
 export default async function Home() {
-  console.log("here2");
   if (!process.env.NEYNAR_QUERY_URL) {
     throw new Error("NEYNAR_QUERY_URL is not set");
   }
@@ -29,11 +28,22 @@ export default async function Home() {
 
   const neynar = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
 
-  const res = await fetch(process.env.NEYNAR_QUERY_URL, {
-    next: { revalidate: 60 * 60 * 2 },
-  }).then((res) => res.json());
+  try {
+    const res = await fetch(process.env.NEYNAR_QUERY_URL, {
+      // method: "POST",
+      // headers: {
+      //   "Content-Type": "application/json",
+      //   // 'Content-Type': 'application/x-www-form-urlencoded',
+      // },
+      // body: JSON.stringify({}),
+      next: { revalidate: REVALIDATION_INTERVAL },
+    }).then((res) => res.json());
 
-  if (res.query_result) {
+    if (!res.query_result) {
+      console.error(res);
+      return <div>No data</div>;
+    }
+
     const queryRows = res.query_result.data.rows.slice(0, 100);
     const bulkUsers = await neynar.fetchBulkUsers(
       queryRows.map((d: any) => d.target_fid),
@@ -63,8 +73,6 @@ export default async function Home() {
       .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
 
     const rowStyles = "grid grid-cols-[60px_2fr_1fr_1fr] w-full w-full  p-2";
-
-    console.log(userData);
 
     return (
       <Container variant="page">
@@ -117,7 +125,8 @@ export default async function Home() {
         </main>
       </Container>
     );
-  } else {
-    return <div>No data</div>;
+  } catch (error) {
+    console.error(error);
+    return <div>Error</div>;
   }
 }

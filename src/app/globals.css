@@ -70,47 +70,6 @@
   }
 }
 
-h1 {
-  font-size: 250%;
-  line-height: 1.35;
-  font-style: normal;
-  margin: 1.5rem 0 0.8rem;
-}
-
-h2 {
-  font-weight: bold;
-  font-size: 200%;
-  margin: 1rem 0 0.8rem;
-}
-
-h3 {
-  font-weight: normal;
-  font-size: 150%;
-  letter-spacing: 0.15rem;
-  margin: 1.75rem 0 0.8rem;
-}
-
-h4 {
-  font-weight: normal;
-  font-size: 130%;
-  letter-spacing: 0.1rem;
-  margin: 1.5rem 0 0.8rem;
-}
-
-h5 {
-  font-weight: normal;
-  font-style: italic;
-  font-size: 120%;
-  margin: 1.5rem 0 0.8rem;
-}
-
-h6 {
-  font-weight: bold;
-  font-size: 100%;
-  letter-spacing: 0.1rem;
-  margin: 1.5rem 0 0.8rem;
-}
-
 @layer base {
   * {
     @apply border-border;
@@ -123,6 +82,54 @@ h6 {
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-weight: 300;
+  }
+
+  h1 {
+    font-size: 180%;
+    line-height: 1.35;
+    font-weight: 600;
+    margin: 1.5rem 0 0.8rem;
+  }
+
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 250%;
+    }
+  }
+
+  h2 {
+    font-weight: semi-bold;
+    font-size: 200%;
+    margin: 1rem 0 0.8rem;
+  }
+
+  h3 {
+    font-weight: normal;
+    font-size: 150%;
+    letter-spacing: 0.15rem;
+    margin: 1.75rem 0 0.8rem;
+  }
+
+  h4 {
+    font-weight: normal;
+    font-size: 130%;
+    letter-spacing: 0.1rem;
+    margin: 1.5rem 0 0.8rem;
+  }
+
+  h5 {
+    font-weight: normal;
+    font-style: italic;
+    font-size: 120%;
+    margin: 1.5rem 0 0.8rem;
+  }
+
+  h6 {
+    font-weight: bold;
+    font-size: 100%;
+    letter-spacing: 0.1rem;
+    margin: 1.5rem 0 0.8rem;
   }
 
   label {

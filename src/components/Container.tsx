@@ -5,7 +5,7 @@ import * as React from "react";
 const containerVariants = cva("container prose", {
   variants: {
     variant: {
-      page: "my-8",
+      page: "p-4 md:p-8",
       section: "my-8",
     },
   },

@@ -1,6 +1,10 @@
 "use client";
 
-import { Tooltip } from "@components/ui/Tooltip";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@components/ui/Popover";
 import { FOLLOWER_THRESHOLD } from "@lib/constants";
 import { Info } from "lucide-react";
 import React from "react";
@@ -12,17 +16,18 @@ function Title({ lastUpdate }: { lastUpdate?: string }) {
       <p className="flex flex-col text-muted-foreground justify-center items-center">
         <span className="flex">
           Trending accounts of the past day{" "}
-          <Tooltip
-            content={
+          <Popover>
+            <PopoverTrigger>
+              <Info className="ml-2" />
+            </PopoverTrigger>
+            <PopoverContent>
               <p className="max-w-[300px]">
                 Accounts with {FOLLOWER_THRESHOLD} or less followers are not
                 included, as well as accounts with spammy keywords in recent
                 casts.
               </p>
-            }
-          >
-            <Info className="ml-2" />
-          </Tooltip>
+            </PopoverContent>
+          </Popover>
         </span>
         {lastUpdate && (
           <span>

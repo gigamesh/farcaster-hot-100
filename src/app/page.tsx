@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 };
 
 const rowStyles =
-  "grid grid-cols-[40px_1.5fr_minmax(90px,1fr)_minmax(90px,1fr)] md:grid-cols-[50px_2fr_minmax(90px,1fr)_minmax(90px,1fr)] w-full w-full  p-2";
+  "grid grid-cols-[30px_40px_1.5fr_minmax(90px,1fr)_minmax(100px,1fr)] md:grid-cols-[50px_2fr_minmax(910px,1fr)_minmax(90px,1fr)] w-full w-full  py-2";
 
 export default async function Home() {
   if (!process.env.NEYNAR_QUERY_URL) {
@@ -126,6 +126,7 @@ export default async function Home() {
               className={cn(rowStyles, "mb-8 uppercase border-b-[1px] pb-2")}
             >
               <span></span>
+              <span></span>
               <span className="self-end">Name</span>
               <span className="text-right">
                 Follower
@@ -138,13 +139,14 @@ export default async function Home() {
                 Total
               </span>
             </div>
-            {userData.map((user) => (
+            {userData.map((user, i) => (
               <a
                 href={getProfileUrl(user.username)}
                 target="_blank"
                 key={user.fid}
                 className={cn(rowStyles, "rounded-lg hover:bg-muted")}
               >
+                <span>{i + 1}</span>
                 <Image
                   className="rounded-full h-[30px] w-[30px]"
                   src={user.pfpUrl}
@@ -153,6 +155,7 @@ export default async function Home() {
                   width={30}
                   style={{ objectFit: "cover" }}
                 />
+
                 <span>{user.displayName}</span>
                 <span className="flex justify-end">
                   <span className="text-green-500 mr-1">▲</span>{" "}

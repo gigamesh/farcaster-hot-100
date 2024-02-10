@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 };
 
 const rowStyles =
-  "grid grid-cols-[30px_40px_1.5fr_minmax(90px,1fr)_minmax(100px,1fr)] md:grid-cols-[50px_2fr_minmax(910px,1fr)_minmax(90px,1fr)] w-full w-full  py-2";
+  "grid grid-cols-[30px_40px_1.5fr_minmax(100px,1fr)_minmax(100px,1fr)] md:grid-cols-[30px_50px_2fr_minmax(100px,1fr)_minmax(100px,1fr)] w-full w-full  py-2";
 
 export default async function Home() {
   if (!process.env.NEYNAR_QUERY_URL) {

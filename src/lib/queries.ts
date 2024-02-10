@@ -1,4 +1,4 @@
-import { REVALIDATION_INTERVAL } from "@lib/constants";
+import { FOLLOWER_THRESHOLD, REVALIDATION_INTERVAL } from "@lib/constants";
 import { unstable_cache } from "next/cache";
 import { Client } from "pg";
 
@@ -68,7 +68,7 @@ async function dbCall() {
     GROUP BY
       target_fid
     HAVING
-      COUNT(*) >= 500
+      COUNT(*) >= ${FOLLOWER_THRESHOLD}
   ),
   FilteredReactions AS (
     SELECT

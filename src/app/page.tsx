@@ -1,10 +1,14 @@
-import React from "react";
+import { Container } from "@components/Container";
+import { ThemeToggle } from "@components/ThemeToggle";
+import Title from "@components/Title";
+import { trendingByFollowerCount } from "@lib/queries";
+import { clampValue, cn } from "@lib/utils";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import Image from "next/image";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { Container } from "@components/Container";
-import { clampValue, cn } from "@lib/utils";
-import { trendingByFollowerCount } from "@lib/queries";
+import React from "react";
+
+const rowStyles =
+  "grid grid-cols-[40px_1.5fr_minmax(90px,1fr)_minmax(90px,1fr)] md:grid-cols-[50px_2fr_minmax(90px,1fr)_minmax(90px,1fr)] w-full w-full  p-2";
 
 export default async function Home() {
   if (!process.env.NEYNAR_QUERY_URL) {
@@ -27,48 +31,45 @@ export default async function Home() {
 
   const neynar = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
 
-  try {
-    const queryResult = await trendingByFollowerCount();
+  const queryResult = await trendingByFollowerCount();
 
-    if (!queryResult.rows) {
-      return <div>No data</div>;
-    }
+  if (!queryResult.rows) {
+    return <div>No data</div>;
+  }
 
-    const queryRows = queryResult.rows.slice(0, 100);
-    const bulkUsers = await neynar.fetchBulkUsers(
-      queryRows.map((d: any) => d.target_fid),
-      {}
-    );
+  const queryRows = queryResult.rows.slice(0, 100);
+  const bulkUsers = await neynar.fetchBulkUsers(
+    queryRows.map((d: any) => d.target_fid),
+    {}
+  );
 
-    userData = bulkUsers.users
-      .map((u) => {
-        const matchingFid = queryRows.find((d: any) => d.target_fid === u.fid);
+  userData = bulkUsers.users
+    .map((u) => {
+      const matchingFid = queryRows.find((d: any) => d.target_fid === u.fid);
 
-        if (!matchingFid) {
-          throw new Error(`No matching fid for user ${u.fid}`);
-        }
+      if (!matchingFid) {
+        throw new Error(`No matching fid for user ${u.fid}`);
+      }
 
-        return {
-          fid: u.fid,
-          username: u.username,
-          displayName: u.display_name,
-          pfpUrl: u.pfp_url,
-          followerCount: matchingFid.total_link_count,
-          newFollowers: matchingFid.recent_link_count,
-          followerIncrease: (
-            clampValue({
-              value:
-                matchingFid.recent_link_count / matchingFid.total_link_count,
-              max: 1,
-            }) * 100
-          ).toFixed(2),
-        };
-      })
-      .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
+      return {
+        fid: u.fid,
+        username: u.username,
+        displayName: u.display_name,
+        pfpUrl: u.pfp_url,
+        followerCount: matchingFid.total_link_count,
+        newFollowers: matchingFid.recent_link_count,
+        followerIncrease: (
+          clampValue({
+            value: matchingFid.recent_link_count / matchingFid.total_link_count,
+            max: 1,
+          }) * 100
+        ).toFixed(2),
+      };
+    })
+    .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
 
-    const rowStyles = "grid grid-cols-[60px_2fr_1fr_1fr] w-full w-full  p-2";
-
-    return (
+  return (
+    <>
       <Container variant="page">
         <header className="flex justify-between p-2">
           <ThemeToggle />
@@ -86,20 +87,7 @@ export default async function Home() {
           </div>
         </header>
         <main className="flex min-h-screen flex-col items-center justify-between pb-24">
-          <h1>🔥 Farcaster Hot 100 🔥</h1>
-          <p className="flex flex-col text-muted-foreground justify-center items-center">
-            <span>Trending accounts of the past day</span>
-            <span>
-              Last updated:{" "}
-              {new Intl.DateTimeFormat("en-GB", {
-                weekday: "short",
-                hour: "numeric",
-                minute: "numeric",
-                second: "numeric",
-                hour12: true,
-              }).format(new Date(queryResult.time))}
-            </span>
-          </p>
+          <Title lastUpdate={queryResult.time} />
           <div className="mt-6 max-w-[800px]">
             <div
               className={cn(rowStyles, "mb-8 uppercase border-b-[1px] pb-2")}
@@ -132,19 +120,19 @@ export default async function Home() {
                   width={30}
                 />
                 <span>{user.displayName}</span>
-                <span className="text-right flex">
+                <span className="flex justify-end">
                   <span className="text-green-500 mr-1">▲</span>{" "}
                   {user.followerIncrease}%
                 </span>
-                <span className="text-right">{user.followerCount}</span>
+                <span className="text-right">
+                  {user.followerCount.toLocaleString()}
+                </span>
               </a>
             ))}
           </div>
         </main>
       </Container>
-    );
-  } catch (error) {
-    console.error(error);
-    return <div>Error</div>;
-  }
+      <Title lastUpdate={queryResult.time} />
+    </>
+  );
 }

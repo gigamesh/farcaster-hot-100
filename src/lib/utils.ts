@@ -16,3 +16,11 @@ export function clampValue({
 }) {
   return Math.min(Math.max(value, min), max);
 }
+
+export function getProfileUrl(username: string) {
+  if (username.startsWith("!")) {
+    return `https://warpcast.com/~/profiles/${username}`;
+  }
+
+  return `https://warpcast.com/${username}`;
+}

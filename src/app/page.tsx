@@ -2,7 +2,7 @@ import { Container } from "@components/Container";
 import { ThemeToggle } from "@components/ThemeToggle";
 import Title from "@components/Title";
 import { trendingByFollowerCount } from "@lib/queries";
-import { clampValue, cn } from "@lib/utils";
+import { clampValue, cn, getProfileUrl } from "@lib/utils";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 import Image from "next/image";
 import React from "react";
@@ -107,7 +107,7 @@ export default async function Home() {
             </div>
             {userData.map((user) => (
               <a
-                href={`https://warpcast.com/${user.username}`}
+                href={getProfileUrl(user.username)}
                 target="_blank"
                 key={user.fid}
                 className={cn(rowStyles, "rounded-lg hover:bg-muted")}
@@ -132,7 +132,6 @@ export default async function Home() {
           </div>
         </main>
       </Container>
-      <Title lastUpdate={queryResult.time} />
     </>
   );
 }

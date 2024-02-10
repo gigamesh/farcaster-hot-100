@@ -1,6 +1,8 @@
+"use client";
+
 import React from "react";
 
-function Title({ lastUpdate }: { lastUpdate?: Date }) {
+function Title({ lastUpdate }: { lastUpdate?: string }) {
   return (
     <>
       <h1>🔥 Farcaster Hot 100 🔥</h1>

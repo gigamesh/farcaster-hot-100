@@ -134,13 +134,13 @@ async function dbCall() {
     100;`);
 
   return {
-    time: new Date(),
+    time: new Date().toISOString(),
     rows: processeRows(queryResult.rows),
   };
 }
 
 const dummyResponse = {
-  time: new Date(1707536760230),
+  time: new Date(1707536760230).toISOString(),
   rows: processeRows([
     {
       target_fid: "328757",

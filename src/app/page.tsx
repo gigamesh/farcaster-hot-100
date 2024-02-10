@@ -4,8 +4,41 @@ import Title from "@components/Title";
 import { trendingByFollowerCount } from "@lib/queries";
 import { clampValue, cn, getProfileUrl } from "@lib/utils";
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { Metadata } from "next";
 import Image from "next/image";
 import React from "react";
+
+const TITLE = "Farcaster Hot 100";
+const DESCRIPTION = "Trending Farcaster accounts";
+const SEO_IMAGE = "https://fc.hot100.xyz/seo.png";
+
+export const metadata: Metadata = {
+  title: TITLE,
+  applicationName: TITLE,
+  authors: [
+    {
+      name: "Gigamesh",
+      url: "https://warpcast.com/gigamesh",
+    },
+  ],
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: "https://fc.hot100.xyz",
+    siteName: TITLE,
+    images: [{ url: SEO_IMAGE, width: 1200, height: 604 }],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    creator: "@gigamesh",
+    images: [SEO_IMAGE],
+  },
+  description: DESCRIPTION,
+};
 
 const rowStyles =
   "grid grid-cols-[40px_1.5fr_minmax(90px,1fr)_minmax(90px,1fr)] md:grid-cols-[50px_2fr_minmax(90px,1fr)_minmax(90px,1fr)] w-full w-full  p-2";

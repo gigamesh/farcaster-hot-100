@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Farcaster Hot 100",
-  description: "Trending Farcaster accounts of the past day",
+  description: "Trending Farcaster accounts",
 };
 
 export default function RootLayout({

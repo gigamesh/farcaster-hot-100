@@ -32,7 +32,7 @@ function Title({ lastUpdate }: { lastUpdate?: string }) {
         {lastUpdate && (
           <span>
             Last updated:{" "}
-            {new Intl.DateTimeFormat("en-GB", {
+            {new Intl.DateTimeFormat(navigator.language, {
               weekday: "short",
               hour: "numeric",
               minute: "numeric",

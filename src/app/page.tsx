@@ -151,6 +151,7 @@ export default async function Home() {
                   alt={user.username}
                   height={30}
                   width={30}
+                  style={{ objectFit: "cover" }}
                 />
                 <span>{user.displayName}</span>
                 <span className="flex justify-end">

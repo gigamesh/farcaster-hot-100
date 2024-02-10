@@ -29,7 +29,7 @@ function Title({ lastUpdate }: { lastUpdate?: string }) {
             </PopoverContent>
           </Popover>
         </span>
-        {lastUpdate && (
+        {lastUpdate && typeof window !== "undefined" && (
           <span>
             Last updated:{" "}
             {new Intl.DateTimeFormat(navigator.language, {

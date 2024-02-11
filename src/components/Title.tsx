@@ -10,7 +10,13 @@ import { Info } from "lucide-react";
 import React from "react";
 
 function Title({ lastUpdate }: { lastUpdate?: string }) {
-  return (
+  const [hasMounted, setHasMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  return hasMounted ? (
     <>
       <h1>🔥 Farcaster Hot 100 🔥</h1>
       <p className="flex flex-col text-muted-foreground justify-center items-center">
@@ -43,7 +49,7 @@ function Title({ lastUpdate }: { lastUpdate?: string }) {
         )}
       </p>
     </>
-  );
+  ) : null;
 }
 
 export default Title;

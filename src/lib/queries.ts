@@ -34,15 +34,7 @@ function processeRows(
   });
 }
 
-export const trendingByFollowerCount = unstable_cache(
-  dbCall,
-  ["trending-by-followers"],
-  {
-    revalidate: REVALIDATION_INTERVAL,
-  }
-);
-
-async function dbCall() {
+export async function trendingByFollowerCount() {
   if (process.env.NODE_ENV === "development") {
     console.log("Using dummy response");
     return dummyResponse;

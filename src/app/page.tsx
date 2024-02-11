@@ -8,7 +8,8 @@ import { Metadata } from "next";
 import Image from "next/image";
 import React from "react";
 
-export const revalidate = 21600;
+// export const revalidate = 21600;
+export const revalidate = 300;
 
 const TITLE = "🔥 Farcaster Hot 100 🔥";
 const DESCRIPTION = "Trending Farcaster accounts";

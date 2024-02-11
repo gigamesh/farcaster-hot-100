@@ -19,7 +19,7 @@ export function clampValue({
 
 export function getProfileUrl(username: string) {
   if (username.startsWith("!")) {
-    return `https://warpcast.com/~/profiles/${username}`;
+    return `https://warpcast.com/~/profiles/${username.slice(1)}`; // Removes the leading '!'
   }
 
   return `https://warpcast.com/${username}`;

@@ -35,6 +35,8 @@ function processeRows(
 }
 
 export async function trendingByFollowerCount() {
+  console.log("trendingByFollowerCount cache miss");
+
   if (process.env.NODE_ENV === "development") {
     console.log("Using dummy response");
     return {

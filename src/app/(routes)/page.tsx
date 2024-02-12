@@ -10,6 +10,7 @@ import React from "react";
 
 // export const revalidate = 21600;
 export const revalidate = 300;
+export const maxDuration = 300;
 
 const TITLE = "🔥 Farcaster Hot 100 🔥";
 const DESCRIPTION = "Trending Farcaster accounts";

@@ -2,17 +2,17 @@ import { Container } from "@components/Container";
 import { ThemeToggle } from "@components/ThemeToggle";
 import Title from "@components/Title";
 import { trendingByFollowerCount } from "@lib/queries";
+<<<<<<< HEAD
 import { cn, getProfileUrl } from "@lib/utils";
+=======
+import { clampValue, cn, getProfileUrl } from "@lib/utils";
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+>>>>>>> d3d8272 (Using unstable_cache)
 import { Metadata } from "next";
 import Image from "next/image";
 import React from "react";
 
 export const maxDuration = 300;
-
-const baseURL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "https://fc.hot100.xyz";
 
 const TITLE = "🔥 Farcaster Hot 100 🔥";
 const DESCRIPTION = "Trending Farcaster accounts";
@@ -61,6 +61,62 @@ export default async function Home() {
     throw new Error("No data");
   }
 
+<<<<<<< HEAD
+=======
+  if (!process.env.NEYNAR_API_KEY) {
+    throw new Error("NEYNAR_API_KEY is not set");
+  }
+
+  let userData: {
+    fid: number;
+    username: string;
+    displayName: string;
+    pfpUrl: string;
+    followerCount: number;
+    newFollowers: number;
+    followerIncrease: string;
+  }[] = [];
+
+  const neynar = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
+
+  const queryResult = await trendingByFollowerCount();
+
+  if (!queryResult.rows) {
+    return <div>No data</div>;
+  }
+
+  const queryRows = queryResult.rows.slice(0, 100);
+  const bulkUsers = await neynar.fetchBulkUsers(
+    queryRows.map((d: any) => d.target_fid),
+    {}
+  );
+
+  userData = bulkUsers.users
+    .map((u) => {
+      const matchingFid = queryRows.find((d: any) => d.target_fid === u.fid);
+
+      if (!matchingFid) {
+        throw new Error(`No matching fid for user ${u.fid}`);
+      }
+
+      return {
+        fid: u.fid,
+        username: u.username,
+        displayName: u.display_name,
+        pfpUrl: u.pfp_url,
+        followerCount: matchingFid.total_link_count,
+        newFollowers: matchingFid.recent_link_count,
+        followerIncrease: (
+          clampValue({
+            value: matchingFid.recent_link_count / matchingFid.total_link_count,
+            max: 1,
+          }) * 100
+        ).toFixed(2),
+      };
+    })
+    .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
+
+>>>>>>> d3d8272 (Using unstable_cache)
   return (
     <>
       <Container variant="page">

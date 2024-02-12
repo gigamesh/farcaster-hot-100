@@ -1,6 +1,7 @@
 import { FOLLOWER_THRESHOLD } from "@lib/constants";
 import { dummyUserData } from "@lib/dummyData";
 import { clampValue } from "@lib/utils";
+import { unstable_cache } from "next/cache";
 import { Client } from "pg";
 
 if (!process.env.DATABASE_PW) {
@@ -41,10 +42,7 @@ function processeRows(
     }
   );
 }
-
-export type TrendingResponse = ReturnType<typeof trendingByFollowerCount>;
-
-export async function trendingByFollowerCount() {
+async function dbCall() {
   console.log("trendingByFollowerCount cache miss");
 
   if (process.env.NODE_ENV === "development") {
@@ -100,7 +98,7 @@ async function trendingQuery() {
     GROUP BY
       target_fid
     HAVING
-      COUNT(*) >= 300
+      COUNT(*) >= ${FOLLOWER_THRESHOLD}
   ),
   FilteredReactions AS (
     SELECT
@@ -179,3 +177,11 @@ async function trendingQuery() {
   LIMIT
     100;`);
 }
+
+export const trendingByFollowerCount = unstable_cache(
+  dbCall,
+  ["trending-by-followers"],
+  {
+    revalidate: 21600,
+  }
+);

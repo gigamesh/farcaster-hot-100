@@ -42,6 +42,8 @@ function processeRows(
   );
 }
 
+export type TrendingResponse = ReturnType<typeof trendingByFollowerCount>;
+
 export async function trendingByFollowerCount() {
   console.log("trendingByFollowerCount cache miss");
 

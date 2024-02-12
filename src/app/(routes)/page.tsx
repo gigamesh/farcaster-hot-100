@@ -7,9 +7,12 @@ import { Metadata } from "next";
 import Image from "next/image";
 import React from "react";
 
-export const revalidate = 21600;
-// export const revalidate = 300;
 export const maxDuration = 300;
+
+const baseURL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://fc.hot100.xyz";
 
 const TITLE = "🔥 Farcaster Hot 100 🔥";
 const DESCRIPTION = "Trending Farcaster accounts";

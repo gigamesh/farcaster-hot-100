@@ -3,7 +3,6 @@ import { trendingByFollowerCount } from "@lib/queries";
 import { NextRequest, NextResponse } from "next/server";
 import { isApiErrorResponse } from "@neynar/nodejs-sdk";
 
-export const revalidate = 21600;
 export const maxDuration = 300;
 
 const BOT_SIGNER_UUID = process.env.BOT_SIGNER_UUID;

@@ -1,9 +1,14 @@
 import { FOLLOWER_THRESHOLD } from "@lib/constants";
-import { dummyRows } from "@lib/dummyData";
+import { dummyUserData } from "@lib/dummyData";
+import { clampValue } from "@lib/utils";
 import { Client } from "pg";
 
 if (!process.env.DATABASE_PW) {
   throw new Error("DATABASE_PW is not set");
+}
+
+if (!process.env.NEYNAR_API_KEY) {
+  throw new Error("NEYNAR_API_KEY is not set");
 }
 
 const db = new Client({
@@ -24,14 +29,17 @@ function processeRows(
     ratio: string | number;
   }[]
 ) {
-  return rows.map((d) => {
-    return {
-      target_fid: parseInt(d.target_fid.toString()),
-      recent_link_count: parseInt(d.recent_link_count.toString()),
-      total_link_count: parseInt(d.total_link_count.toString()),
-      ratio: parseFloat(d.ratio.toString()),
-    };
-  });
+  return rows.map(
+    ({ target_fid, recent_link_count, total_link_count, ratio, ...rest }) => {
+      return {
+        target_fid: parseInt(target_fid.toString()),
+        recent_link_count: parseInt(recent_link_count.toString()),
+        total_link_count: parseInt(total_link_count.toString()),
+        ratio: parseFloat(ratio.toString()),
+        ...rest,
+      };
+    }
+  );
 }
 
 export async function trendingByFollowerCount() {
@@ -41,11 +49,36 @@ export async function trendingByFollowerCount() {
     console.log("Using dummy response");
     return {
       time: new Date().toISOString(),
-      rows: processeRows(dummyRows),
+      userData: dummyUserData,
     };
   }
 
-  const queryResult = await db.query(/* sql */ `WITH RecentLinks AS (
+  const queryResult = await trendingQuery();
+
+  const userData = queryResult.rows
+    .map((u) => {
+      return {
+        fid: u.target_fid,
+        username: u.fname,
+        displayName: u.display_name,
+        pfpUrl: u.avatar_url,
+        followerCount: u.total_link_count,
+        newFollowers: u.recent_link_count,
+        followerIncrease: u.ratio,
+      };
+    })
+    .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
+
+  console.log(userData);
+
+  return {
+    time: new Date().toISOString(),
+    userData,
+  };
+}
+
+async function trendingQuery() {
+  return await db.query(/* sql */ `WITH RecentLinks AS (
     SELECT
       target_fid,
       COUNT(*) AS recent_link_count
@@ -65,7 +98,7 @@ export async function trendingByFollowerCount() {
     GROUP BY
       target_fid
     HAVING
-      COUNT(*) >= ${FOLLOWER_THRESHOLD}
+      COUNT(*) >= 300
   ),
   FilteredReactions AS (
     SELECT
@@ -112,9 +145,25 @@ export async function trendingByFollowerCount() {
     FROM
       TotalLinks tl
       INNER JOIN FilteredReactions fr ON tl.target_fid = fr.target_fid
+  ),
+  ProfileData AS (
+    SELECT
+      fid,
+      MAX(display_name) AS display_name,
+      -- Assuming taking the max is acceptable
+      fname,
+      MAX(avatar_url) AS avatar_url -- Assuming taking the max is acceptable
+    FROM
+      profile_with_addresses
+    GROUP BY
+      fid,
+      fname
   )
   SELECT
     e.target_fid,
+    pd.display_name,
+    pd.fname,
+    pd.avatar_url,
     rl.recent_link_count,
     tl.total_link_count,
     COALESCE(rl.recent_link_count, 0) :: DECIMAL / tl.total_link_count AS ratio
@@ -122,18 +171,9 @@ export async function trendingByFollowerCount() {
     EligibleFIDs e
     LEFT JOIN RecentLinks rl ON e.target_fid = rl.target_fid
     INNER JOIN TotalLinks tl ON e.target_fid = tl.target_fid
-    LEFT JOIN FilteredReactions fr ON e.target_fid = fr.target_fid -- Correctly join FilteredReactions here
-  WHERE
-    tl.total_link_count >= 500 -- Ensure consistency with TotalLinks CTE condition
+    LEFT JOIN ProfileData pd ON e.target_fid = pd.fid
   ORDER BY
     ratio DESC
   LIMIT
     100;`);
-
-  console.log(processeRows(queryResult.rows));
-
-  return {
-    time: new Date().toISOString(),
-    rows: processeRows(queryResult.rows),
-  };
 }

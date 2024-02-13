@@ -1,9 +1,14 @@
 import { FOLLOWER_THRESHOLD } from "@lib/constants";
-import { dummyRows } from "@lib/dummyData";
+import { dummyUserData } from "@lib/dummyData";
+import { clampValue } from "@lib/utils";
 import { Client } from "pg";
 
 if (!process.env.DATABASE_PW) {
   throw new Error("DATABASE_PW is not set");
+}
+
+if (!process.env.NEYNAR_API_KEY) {
+  throw new Error("NEYNAR_API_KEY is not set");
 }
 
 const db = new Client({
@@ -41,11 +46,51 @@ export async function trendingByFollowerCount() {
     console.log("Using dummy response");
     return {
       time: new Date().toISOString(),
-      rows: processeRows(dummyRows),
+      userData: dummyUserData,
     };
   }
 
-  const queryResult = await db.query(/* sql */ `WITH RecentLinks AS (
+  const queryResult = await trendingQuery();
+  const profileData = await getProfileData(
+    queryResult.rows.map((d) => d.target_fid)
+  );
+  const queryRows = processeRows(queryResult.rows).slice(0, 100);
+
+  const userData = profileData.rows
+    .map((u) => {
+      const matchingFid = queryRows.find((d: any) => d.target_fid === u.fid);
+
+      if (!matchingFid) {
+        throw new Error(`No matching fid for user ${u.fid}`);
+      }
+
+      return {
+        fid: u.fid,
+        username: u.fname,
+        displayName: u.display_name,
+        pfpUrl: u.avatar_url,
+        followerCount: matchingFid.total_link_count,
+        newFollowers: matchingFid.recent_link_count,
+        followerIncrease: (
+          clampValue({
+            value: matchingFid.recent_link_count / matchingFid.total_link_count,
+            max: 1,
+          }) * 100
+        ).toFixed(2),
+      };
+    })
+    .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
+
+  console.log(userData);
+
+  return {
+    time: new Date().toISOString(),
+    userData,
+  };
+}
+
+async function trendingQuery() {
+  return await db.query(/* sql */ `WITH RecentLinks AS (
     SELECT
       target_fid,
       COUNT(*) AS recent_link_count
@@ -129,11 +174,13 @@ export async function trendingByFollowerCount() {
     ratio DESC
   LIMIT
     100;`);
+}
 
-  console.log(processeRows(queryResult.rows));
-
-  return {
-    time: new Date().toISOString(),
-    rows: processeRows(queryResult.rows),
-  };
+export async function getProfileData(fids: string[]) {
+  return await db.query(
+    /* sql */ `SELECT fid, fname, display_name, avatar_url
+              FROM profile_with_addresses
+              WHERE fid = ANY($1::bigint[]);`,
+    [fids]
+  );
 }

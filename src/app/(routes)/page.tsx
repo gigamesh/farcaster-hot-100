@@ -2,8 +2,7 @@ import { Container } from "@components/Container";
 import { ThemeToggle } from "@components/ThemeToggle";
 import Title from "@components/Title";
 import { trendingByFollowerCount } from "@lib/queries";
-import { clampValue, cn, getProfileUrl } from "@lib/utils";
-import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { cn, getProfileUrl } from "@lib/utils";
 import { Metadata } from "next";
 import Image from "next/image";
 import React from "react";
@@ -48,62 +47,11 @@ const rowStyles =
   "grid grid-cols-[30px_40px_1.5fr_minmax(100px,1fr)_minmax(100px,1fr)] md:grid-cols-[30px_50px_2fr_minmax(100px,1fr)_minmax(100px,1fr)] w-full w-full  py-2";
 
 export default async function Home() {
-  if (!process.env.NEYNAR_QUERY_URL) {
-    throw new Error("NEYNAR_QUERY_URL is not set");
+  const { userData, time } = await trendingByFollowerCount();
+
+  if (!userData.length) {
+    throw new Error("No data");
   }
-
-  if (!process.env.NEYNAR_API_KEY) {
-    throw new Error("NEYNAR_API_KEY is not set");
-  }
-
-  let userData: {
-    fid: number;
-    username: string;
-    displayName: string;
-    pfpUrl: string;
-    followerCount: number;
-    newFollowers: number;
-    followerIncrease: string;
-  }[] = [];
-
-  const neynar = new NeynarAPIClient(process.env.NEYNAR_API_KEY);
-
-  const queryResult = await trendingByFollowerCount();
-
-  if (!queryResult.rows) {
-    return <div>No data</div>;
-  }
-
-  const queryRows = queryResult.rows.slice(0, 100);
-  const bulkUsers = await neynar.fetchBulkUsers(
-    queryRows.map((d: any) => d.target_fid),
-    {}
-  );
-
-  userData = bulkUsers.users
-    .map((u) => {
-      const matchingFid = queryRows.find((d: any) => d.target_fid === u.fid);
-
-      if (!matchingFid) {
-        throw new Error(`No matching fid for user ${u.fid}`);
-      }
-
-      return {
-        fid: u.fid,
-        username: u.username,
-        displayName: u.display_name,
-        pfpUrl: u.pfp_url,
-        followerCount: matchingFid.total_link_count,
-        newFollowers: matchingFid.recent_link_count,
-        followerIncrease: (
-          clampValue({
-            value: matchingFid.recent_link_count / matchingFid.total_link_count,
-            max: 1,
-          }) * 100
-        ).toFixed(2),
-      };
-    })
-    .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
 
   return (
     <>
@@ -124,7 +72,7 @@ export default async function Home() {
           </div>
         </header>
         <main className="flex min-h-screen flex-col items-center justify-between pb-24">
-          <Title lastUpdate={queryResult.time} />
+          <Title lastUpdate={time} />
           <div className="mt-6 max-w-[800px]">
             <div
               className={cn(rowStyles, "mb-8 uppercase border-b-[1px] pb-2")}

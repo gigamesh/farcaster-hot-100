@@ -16,6 +16,11 @@ const DESCRIPTION = "Trending Farcaster accounts";
 const SEO_IMAGE = "https://fc.hot100.xyz/seo.png";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://fc.hot100.xyz"
+  ),
   title: TITLE,
   applicationName: TITLE,
   authors: [
@@ -93,7 +98,7 @@ export default async function Home() {
             </div>
             {userData.map((user, i) => (
               <a
-                href={getProfileUrl(user.username)}
+                href={getProfileUrl({ fid: user.fid, username: user.username })}
                 target="_blank"
                 key={user.fid}
                 className={cn(rowStyles, "rounded-lg hover:bg-muted")}
@@ -111,7 +116,7 @@ export default async function Home() {
                 <span>{user.displayName}</span>
                 <span className="flex justify-end">
                   <span className="text-green-500 mr-1">▲</span>{" "}
-                  {user.followerIncrease}%
+                  {Number(user.followerIncrease).toFixed(2)}%
                 </span>
                 <span className="text-right">
                   {user.followerCount.toLocaleString()}

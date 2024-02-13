@@ -17,7 +17,17 @@ export function clampValue({
   return Math.min(Math.max(value, min), max);
 }
 
-export function getProfileUrl(username: string) {
+export function getProfileUrl({
+  fid,
+  username,
+}: {
+  fid: string;
+  username: string | null;
+}) {
+  if (!username) {
+    return `https://warpcast.com/profiles/${fid}`;
+  }
+
   if (username.startsWith("!")) {
     return `https://warpcast.com/~/profiles/${username.slice(1)}`; // Removes the leading '!'
   }

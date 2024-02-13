@@ -29,14 +29,17 @@ function processeRows(
     ratio: string | number;
   }[]
 ) {
-  return rows.map((d) => {
-    return {
-      target_fid: parseInt(d.target_fid.toString()),
-      recent_link_count: parseInt(d.recent_link_count.toString()),
-      total_link_count: parseInt(d.total_link_count.toString()),
-      ratio: parseFloat(d.ratio.toString()),
-    };
-  });
+  return rows.map(
+    ({ target_fid, recent_link_count, total_link_count, ratio, ...rest }) => {
+      return {
+        target_fid: parseInt(target_fid.toString()),
+        recent_link_count: parseInt(recent_link_count.toString()),
+        total_link_count: parseInt(total_link_count.toString()),
+        ratio: parseFloat(ratio.toString()),
+        ...rest,
+      };
+    }
+  );
 }
 
 export async function trendingByFollowerCount() {
@@ -51,32 +54,17 @@ export async function trendingByFollowerCount() {
   }
 
   const queryResult = await trendingQuery();
-  const profileData = await getProfileData(
-    queryResult.rows.map((d) => d.target_fid)
-  );
-  const queryRows = processeRows(queryResult.rows).slice(0, 100);
 
-  const userData = profileData.rows
+  const userData = queryResult.rows
     .map((u) => {
-      const matchingFid = queryRows.find((d: any) => d.target_fid === u.fid);
-
-      if (!matchingFid) {
-        throw new Error(`No matching fid for user ${u.fid}`);
-      }
-
       return {
-        fid: u.fid,
+        fid: u.target_fid,
         username: u.fname,
         displayName: u.display_name,
         pfpUrl: u.avatar_url,
-        followerCount: matchingFid.total_link_count,
-        newFollowers: matchingFid.recent_link_count,
-        followerIncrease: (
-          clampValue({
-            value: matchingFid.recent_link_count / matchingFid.total_link_count,
-            max: 1,
-          }) * 100
-        ).toFixed(2),
+        followerCount: u.total_link_count,
+        newFollowers: u.recent_link_count,
+        followerIncrease: u.ratio,
       };
     })
     .sort((a, b) => Number(b.followerIncrease) - Number(a.followerIncrease));
@@ -110,7 +98,7 @@ async function trendingQuery() {
     GROUP BY
       target_fid
     HAVING
-      COUNT(*) >= ${FOLLOWER_THRESHOLD}
+      COUNT(*) >= 300
   ),
   FilteredReactions AS (
     SELECT
@@ -157,9 +145,25 @@ async function trendingQuery() {
     FROM
       TotalLinks tl
       INNER JOIN FilteredReactions fr ON tl.target_fid = fr.target_fid
+  ),
+  ProfileData AS (
+    SELECT
+      fid,
+      MAX(display_name) AS display_name,
+      -- Assuming taking the max is acceptable
+      fname,
+      MAX(avatar_url) AS avatar_url -- Assuming taking the max is acceptable
+    FROM
+      profile_with_addresses
+    GROUP BY
+      fid,
+      fname
   )
   SELECT
     e.target_fid,
+    pd.display_name,
+    pd.fname,
+    pd.avatar_url,
     rl.recent_link_count,
     tl.total_link_count,
     COALESCE(rl.recent_link_count, 0) :: DECIMAL / tl.total_link_count AS ratio
@@ -167,20 +171,9 @@ async function trendingQuery() {
     EligibleFIDs e
     LEFT JOIN RecentLinks rl ON e.target_fid = rl.target_fid
     INNER JOIN TotalLinks tl ON e.target_fid = tl.target_fid
-    LEFT JOIN FilteredReactions fr ON e.target_fid = fr.target_fid -- Correctly join FilteredReactions here
-  WHERE
-    tl.total_link_count >= 500 -- Ensure consistency with TotalLinks CTE condition
+    LEFT JOIN ProfileData pd ON e.target_fid = pd.fid
   ORDER BY
     ratio DESC
   LIMIT
     100;`);
-}
-
-export async function getProfileData(fids: string[]) {
-  return await db.query(
-    /* sql */ `SELECT fid, fname, display_name, avatar_url
-              FROM profile_with_addresses
-              WHERE fid = ANY($1::bigint[]);`,
-    [fids]
-  );
 }

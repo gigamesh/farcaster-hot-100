@@ -1,9 +1,9 @@
 import neynarClient from "@lib/neynarClient";
 import { trendingByFollowerCount } from "@lib/queries";
 import { NextRequest, NextResponse } from "next/server";
-import { isApiErrorResponse } from "@neynar/nodejs-sdk";
 
 export const maxDuration = 300;
+export const revalidate = 0;
 
 const BOT_SIGNER_UUID = process.env.BOT_SIGNER_UUID;
 
@@ -28,20 +28,26 @@ export async function GET(req: NextRequest) {
     message += `#${index + 1} @${user.username}\n`;
   });
 
-  message += `\n\n\nhttps://fc.hot100.xyz\n`;
+  // message += `\n\n\nhttps://fc.hot100.xyz\n`;
 
   console.log(message);
 
-  try {
-    await neynarClient.publishCast(BOT_SIGNER_UUID, message, {
-      channelId: "farcaster",
-      embeds: [{ url: "https://fc.hot100.xyz" }],
-    });
-  } catch (err) {
-    if (isApiErrorResponse(err)) {
-      console.log(err.response.data);
-    } else console.log(err);
-  }
+  if (process.env.NODE_ENV !== "development") {
+    // IMPORTANT: if you run this in development, it will use the dummy data response!
+    try {
+      const cast = await neynarClient.publishCast(BOT_SIGNER_UUID, message, {
+        channelId: "farcaster",
+        embeds: [{ url: "https://fc.hot100.xyz" }],
+      });
 
-  return NextResponse.json({ success: true });
+      console.log("cast published:", cast);
+
+      return NextResponse.json({ success: true, cast });
+    } catch (err) {
+      console.error(err);
+      return new Response("Server error", {
+        status: 500,
+      });
+    }
+  }
 }

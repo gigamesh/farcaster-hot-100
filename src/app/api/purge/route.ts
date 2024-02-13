@@ -2,10 +2,10 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get("token");
+  const secret = req.nextUrl.searchParams.get("secret");
 
-  if (token !== process.env.PURGE_TOKEN) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  if (secret !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: "Invalid secret" }, { status: 401 });
   }
 
   revalidatePath("/");

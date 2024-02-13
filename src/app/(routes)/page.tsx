@@ -77,9 +77,12 @@ export default async function Home() {
         </header>
         <main className="flex min-h-screen flex-col items-center justify-between pb-24">
           <Title lastUpdate={time} />
-          <div className="mt-6 max-w-[800px]">
+          <div className="mt-6 max-w-[100vw]">
             <div
-              className={cn(rowStyles, "mb-8 uppercase border-b-[1px] pb-2")}
+              className={cn(
+                rowStyles,
+                "mb-8 uppercase border-b-[1px] pb-2 px-2"
+              )}
             >
               <span></span>
               <span></span>
@@ -100,7 +103,7 @@ export default async function Home() {
                 href={getProfileUrl({ fid: user.fid, username: user.username })}
                 target="_blank"
                 key={user.fid}
-                className={cn(rowStyles, "rounded-lg hover:bg-muted")}
+                className={cn(rowStyles, "rounded-lg hover:bg-muted px-2")}
               >
                 <span>{i + 1}</span>
                 <Image
@@ -115,7 +118,7 @@ export default async function Home() {
                 <span>{user.displayName}</span>
                 <span className="flex justify-end">
                   <span className="text-green-500 mr-1">▲</span>{" "}
-                  {Number(user.followerIncrease).toFixed(2)}%
+                  {Number(user.followerIncrease * 100).toFixed(2)}%
                 </span>
                 <span className="text-right">
                   {user.followerCount.toLocaleString()}

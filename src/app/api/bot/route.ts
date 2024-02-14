@@ -1,5 +1,6 @@
 import neynarClient from "@lib/neynarClient";
 import { trendingByFollowerCount } from "@lib/queries";
+import { checkToken } from "@lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
@@ -9,11 +10,9 @@ const BOT_SIGNER_UUID = process.env.BOT_SIGNER_UUID;
 
 /** Called by Vercel cron and posts on Farcaster via Neynar API */
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response("Unauthorized", {
-      status: 401,
-    });
+  const { authorized, response } = checkToken(req);
+  if (!authorized) {
+    return response;
   }
 
   if (typeof BOT_SIGNER_UUID !== "string") {

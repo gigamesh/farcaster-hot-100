@@ -35,3 +35,14 @@ export function getProfileUrl({
 
   return `https://warpcast.com/${username}`;
 }
+
+export function checkToken(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const response = new Response("Unauthorized", {
+      status: 401,
+    });
+    return { response, authorized: false };
+  }
+  return { authorized: true };
+}

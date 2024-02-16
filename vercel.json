@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/bot",
-      "schedule": "15 18 * * *"
+      "schedule": "0 19 * * *"
     },
     {
       "path": "/api/purge",

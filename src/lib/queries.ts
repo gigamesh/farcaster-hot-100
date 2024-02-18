@@ -182,6 +182,6 @@ export const trendingByFollowerCount = unstable_cache(
   dbCall,
   ["trending-by-followers"],
   {
-    revalidate: 21600,
+    revalidate: 8 * 60 * 60,
   }
 );

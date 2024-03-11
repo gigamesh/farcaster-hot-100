@@ -7,14 +7,6 @@
     {
       "path": "/api/purge",
       "schedule": "0 18 * * *"
-    },
-    {
-      "path": "/api/purge",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/purge",
-      "schedule": "0 10 * * *"
     }
   ]
 }

@@ -1,12 +1,2 @@
 {
-  "crons": [
-    {
-      "path": "/api/bot",
-      "schedule": "0 19 * * *"
-    },
-    {
-      "path": "/api/purge",
-      "schedule": "0 18 * * *"
-    }
-  ]
 }

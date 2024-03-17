@@ -1,6 +1,5 @@
 import { FOLLOWER_THRESHOLD } from "@lib/constants";
 import { dummyUserData } from "@lib/dummyData";
-import { clampValue } from "@lib/utils";
 import { unstable_cache } from "next/cache";
 import { Client } from "pg";
 
@@ -22,26 +21,6 @@ const db = new Client({
 
 db.connect();
 
-function processeRows(
-  rows: {
-    target_fid: string | number;
-    recent_link_count: string | number;
-    total_link_count: string | number;
-    ratio: string | number;
-  }[]
-) {
-  return rows.map(
-    ({ target_fid, recent_link_count, total_link_count, ratio, ...rest }) => {
-      return {
-        target_fid: parseInt(target_fid.toString()),
-        recent_link_count: parseInt(recent_link_count.toString()),
-        total_link_count: parseInt(total_link_count.toString()),
-        ratio: parseFloat(ratio.toString()),
-        ...rest,
-      };
-    }
-  );
-}
 async function dbCall() {
   console.log("trendingByFollowerCount cache miss");
 

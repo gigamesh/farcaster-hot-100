@@ -5,13 +5,33 @@ import { defineString } from "firebase-functions/params";
 const CRON_SECRET = defineString("CRON_SECRET");
 
 exports.bot = functions.pubsub.schedule("0 19 * * *").onRun(async () => {
-  fetch("https://fc.hot100.xyz/api/bot", {
-    headers: { Authorization: CRON_SECRET.value() },
-  });
+  try {
+    const response = await fetch("https://fc.hot100.xyz/api/bot", {
+      headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Bot failed with status ${response.status}`);
+    }
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error(e);
+    }
+  }
 });
 
 exports.purge = functions.pubsub.schedule("0 */8 * * *").onRun(async () => {
-  fetch("https://fc.hot100.xyz/api/fetch", {
-    headers: { Authorization: CRON_SECRET.value() },
-  });
+  try {
+    const response = await fetch("https://fc.hot100.xyz/api/purge", {
+      headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Purge failed with status ${response.status}`);
+    }
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error(e);
+    }
+  }
 });

@@ -4,7 +4,7 @@ import { defineString } from "firebase-functions/params";
 
 const CRON_SECRET = defineString("CRON_SECRET");
 
-exports.bot = functions.pubsub.schedule("0 19 * * *").onRun(async () => {
+exports.bot = functions.pubsub.schedule("0 10 * * *").onRun(async () => {
   try {
     const response = await fetch("https://fc.hot100.xyz/api/bot", {
       headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },

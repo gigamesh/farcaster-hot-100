@@ -1,4 +1,4 @@
-import { FOLLOWER_THRESHOLD } from "@lib/constants";
+import { FOLLOWER_THRESHOLD, WARPCAST_API_BASE_URL } from "@lib/constants";
 import { dummyUserData } from "@lib/dummyData";
 import { unstable_cache } from "next/cache";
 import { Client } from "pg";
@@ -32,7 +32,13 @@ async function dbCall() {
     };
   }
 
-  const queryResult = await trendingQuery();
+  const warpcastResponse = (await (
+    await fetch(`${WARPCAST_API_BASE_URL}power-badge-users`)
+  ).json()) as { result: { fids: number[] } };
+
+  const powerUserFids = warpcastResponse.result.fids;
+
+  const queryResult = await trendingQuery(powerUserFids);
 
   const userData = queryResult.rows
     .map((u) => {
@@ -56,7 +62,9 @@ async function dbCall() {
   };
 }
 
-async function trendingQuery() {
+async function trendingQuery(powerUserFids: number[]) {
+  const fids = powerUserFids.map((n) => n.toString()).join(",");
+
   return await db.query(/* sql */ `WITH RecentLinks AS (
     SELECT
       target_fid,
@@ -65,6 +73,7 @@ async function trendingQuery() {
       links
     WHERE
       created_at > NOW() - INTERVAL '24 hours'
+      AND target_fid IN (${fids})
     GROUP BY
       target_fid
   ),
@@ -74,10 +83,10 @@ async function trendingQuery() {
       COUNT(*) AS total_link_count
     FROM
       links
+    WHERE
+      target_fid IN (${fids})
     GROUP BY
       target_fid
-    HAVING
-      COUNT(*) >= ${FOLLOWER_THRESHOLD}
   ),
   FilteredReactions AS (
     SELECT
@@ -134,6 +143,8 @@ async function trendingQuery() {
       MAX(avatar_url) AS avatar_url -- Assuming taking the max is acceptable
     FROM
       profile_with_addresses
+    WHERE
+      fid IN (${fids})
     GROUP BY
       fid,
       fname

@@ -28,9 +28,7 @@ function Title({ lastUpdate }: { lastUpdate?: string }) {
             </PopoverTrigger>
             <PopoverContent>
               <p className="max-w-[300px]">
-                Accounts with {FOLLOWER_THRESHOLD} or less followers are not
-                included, as well as accounts with spammy keywords in recent
-                casts.
+                Only users with a Warpcast power badge are included.
               </p>
             </PopoverContent>
           </Popover>

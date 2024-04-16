@@ -11,7 +11,7 @@ if (!process.env.NEYNAR_API_KEY) {
   throw new Error("NEYNAR_API_KEY is not set");
 }
 
-// process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 const HOST = "db.neynar.com";
 const DATABASE = "farcaster";

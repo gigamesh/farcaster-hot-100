@@ -10,6 +10,7 @@ const nextConfig = {
       },
     ],
   },
+  staticPageGenerationTimeout: 300,
   // logging: {
   //   fetches: {
   //     fullUrl: true,

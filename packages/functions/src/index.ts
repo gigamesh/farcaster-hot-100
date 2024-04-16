@@ -19,18 +19,21 @@ exports.bot = functions.pubsub.schedule("0 10 * * *").onRun(async () => {
   }
 });
 
-exports.purge = functions.pubsub.schedule("0 */8 * * *").onRun(async () => {
-  try {
-    const response = await fetch("https://fc.hot100.xyz/api/purge", {
-      headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },
-    });
+exports.purge = functions
+  .runWith({ timeoutSeconds: 300 })
+  .pubsub.schedule("0 * * * *")
+  .onRun(async () => {
+    try {
+      const response = await fetch("https://fc.hot100.xyz/api/purge", {
+        headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },
+      });
 
-    if (response.status !== 200) {
-      throw new Error(`Purge failed with status ${response.status}`);
+      if (response.status !== 200) {
+        throw new Error(`Purge failed with status ${response.status}`);
+      }
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        console.error(e);
+      }
     }
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      console.error(e);
-    }
-  }
-});
+  });

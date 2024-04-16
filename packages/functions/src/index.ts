@@ -19,7 +19,7 @@ exports.bot = functions.pubsub.schedule("0 10 * * *").onRun(async () => {
   }
 });
 
-exports.purge = functions.pubsub.schedule("0 * * * *").onRun(async () => {
+exports.purge = functions.pubsub.schedule("0 */8 * * *").onRun(async () => {
   try {
     const response = await fetch("https://fc.hot100.xyz/api/purge", {
       headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },

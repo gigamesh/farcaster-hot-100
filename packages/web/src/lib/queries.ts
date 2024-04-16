@@ -1,4 +1,4 @@
-import { FOLLOWER_THRESHOLD, WARPCAST_API_BASE_URL } from "@lib/constants";
+import { WARPCAST_API_BASE_URL } from "@lib/constants";
 import { dummyUserData } from "@lib/dummyData";
 import { unstable_cache } from "next/cache";
 import { Client } from "pg";
@@ -11,12 +11,16 @@ if (!process.env.NEYNAR_API_KEY) {
   throw new Error("NEYNAR_API_KEY is not set");
 }
 
+// process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+
+const HOST = "db.neynar.com";
+const DATABASE = "farcaster";
+const USER = "241468";
+const PORT = 5432;
+const PASSWORD = process.env.DATABASE_PW;
+
 const db = new Client({
-  host: "db.neynar.com",
-  database: "farcaster",
-  user: "241468",
-  port: 5432,
-  password: process.env.DATABASE_PW,
+  connectionString: `postgres://${USER}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}?sslmode=prefer`,
 });
 
 db.connect();

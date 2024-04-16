@@ -1,5 +1,4 @@
 import * as functions from "firebase-functions";
-import fetch from "node-fetch";
 import { defineString } from "firebase-functions/params";
 
 const CRON_SECRET = defineString("CRON_SECRET");

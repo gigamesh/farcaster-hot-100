@@ -17,6 +17,9 @@ importers:
 
   packages/functions:
     dependencies:
+      axios:
+        specifier: ^1.6.8
+        version: 1.6.8
       firebase-admin:
         specifier: ^11.5.0
         version: 11.11.1

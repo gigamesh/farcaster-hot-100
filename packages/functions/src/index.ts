@@ -1,11 +1,12 @@
 import * as functions from "firebase-functions";
 import { defineString } from "firebase-functions/params";
+import axios from "axios";
 
 const CRON_SECRET = defineString("CRON_SECRET");
 
 exports.bot = functions.pubsub.schedule("0 10 * * *").onRun(async () => {
   try {
-    const response = await fetch("https://fc.hot100.xyz/api/bot", {
+    const response = await axios("https://fc.hot100.xyz/api/bot", {
       headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },
     });
 
@@ -21,7 +22,7 @@ exports.bot = functions.pubsub.schedule("0 10 * * *").onRun(async () => {
 
 exports.purge = functions.pubsub.schedule("0 */8 * * *").onRun(async () => {
   try {
-    const response = await fetch("https://fc.hot100.xyz/api/purge", {
+    const response = await axios("https://fc.hot100.xyz/api/purge", {
       headers: { Authorization: `Bearer ${CRON_SECRET.value()}` },
     });
 
